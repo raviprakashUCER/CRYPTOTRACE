@@ -1,33 +1,98 @@
-# SIH-2026: Cryptographic Document Leak Attribution System
+# CRYPTOTRACE
+
+## Cryptographic Attribution and Immutable Decryption Provenance for Multi-Recipient Encrypted Document Distribution
+
+**SIH 2026 — Problem Statement: SIH26237**  
+**Theme:** Cybersecurity & Defence Technology  
+**Category:** Software  
+**Team:** CODEBREAKERS
+
+---
 
 ## Overview
-This system is an **offline, air-gapped cryptographic document distribution and forensic attribution system**. 
-It is designed to solve a fundamental problem in information security: when multiple authorized users receive a decrypted copy of a confidential document, identifying the exact source of a leak is historically impossible because all copies are identical. 
 
-Our system solves this by introducing a **Unique Decryption Session** for every authorized access.
+CRYPTOTRACE is a security-focused document distribution and forensic attribution system designed for situations where the same confidential document must be securely distributed to multiple authorized recipients.
 
-## How it works
+The system combines:
 
-1. **Document Encryption (AES-GCM)**: The document is stored as ciphertext.
-2. **Post-Quantum Key Wrap (ML-KEM-768)**: Every authorized recipient gets a copy of the content key, wrapped using their specific ML-KEM public key.
-3. **The Decryption Event**: When a recipient views the document, the system generates a unique **Event ID**.
-4. **Zero-width ECC Watermark**: The system embeds the Event ID invisibly into the text using zero-width characters and a Reed-Solomon Error Correcting Code (ECC) to ensure resilience against partial deletion.
-5. **Decryption Attestation (ML-DSA-65)**: The recipient cryptographically signs an attestation confirming they decrypted this exact document at this exact time, generating this exact Event ID watermark.
-6. **Offline Ledger (HashChain / Merkle)**: The attestation is appended to an offline, tamper-evident distributed ledger for historical evidence.
+- Post-quantum cryptography
+- Recipient-specific decryption provenance
+- Invisible watermarking
+- Digital signatures
+- Reed-Solomon error correction
+- Tamper-evident hash-chain ledger
+- Merkle inclusion proofs
+- Role-based access control
+- Clearance-based authorization
+- Key lifecycle management
+- Persistent SQLite storage
+- Forensic evidence correlation
 
-If the plaintext ever leaks, the **Forensics Engine** extracts the invisible watermark, looks up the Event ID in the Offline Ledger, and produces a Cryptographically Verified Attribution report!
+The primary goal is to provide **verifiable provenance evidence** when a distributed confidential document is later recovered outside its authorized environment.
 
-## Architecture
-- **Desktop Environment**: Built on **Tauri** to run as a native desktop application in an air-gapped environment.
-- **Frontend Dashboard**: Built with **Next.js** and the **UX4G** UI standard.
-- **Core Cryptography**: Native **Rust** backend services.
+> CRYPTOTRACE treats watermarking and ledger records as forensic evidence. It does not claim absolute attribution or an impossible-to-remove watermark.
 
-## Packages
-The system is built as a Cargo Workspace containing multiple decoupled services:
-- `apps/web-console`: The Next.js and Tauri app shell.
-- `packages/crypto-core`: Core primitives for AES-GCM and SHA-3.
-- `packages/identity-core`: Post-Quantum cryptographic identity generation.
-- `packages/watermark-core`: Zero-width Reed-Solomon Error Correction encoding.
-- `packages/ledger-core`: The base HashChain and Merkle verification structures.
-- `packages/system-tests`: The full adversarial security test and performance benchmarking suite.
-- `services/*`: Microservices tying the primitives to domain logic.
+---
+
+# Problem
+
+Consider a confidential government document distributed to 10 authorized officers.
+
+All recipients may receive the same encrypted document, but later a leaked copy is discovered.
+
+Traditional encryption can answer:
+
+> "Who was authorized to receive this document?"
+
+But it may not provide sufficient evidence to determine:
+
+> "Which authorized recipient actually decrypted or released this particular copy?"
+
+CRYPTOTRACE addresses this provenance gap by associating a recipient-specific decryption event with the resulting document copy.
+
+---
+
+# Core Concept
+
+```text
+                 CONFIDENTIAL DOCUMENT
+                          |
+                          v
+                    SHA3-256 HASH
+                          |
+                          v
+                  AES-256-GCM ENCRYPTION
+                          |
+                          v
+                 ENCRYPTED CONTENT KEY
+                          |
+              +-----------+-----------+
+              |           |           |
+              v           v           v
+           RECIPIENT A  RECIPIENT B  RECIPIENT C
+              |           |           |
+           ML-KEM       ML-KEM       ML-KEM
+           WRAPPING     WRAPPING     WRAPPING
+              |           |           |
+              +-----------+-----------+
+                          |
+                          v
+                 RECIPIENT DECRYPTION
+                          |
+                          v
+                    UNIQUE EVENT ID
+                          |
+                          v
+                 INVISIBLE WATERMARK
+                          |
+                          v
+               REED-SOLOMON ECC
+                          |
+                          v
+                 ML-DSA SIGNATURE
+                          |
+                          v
+             TAMPER-EVIDENT LEDGER
+                          |
+                          v
+                  FORENSIC ANALYSIS
