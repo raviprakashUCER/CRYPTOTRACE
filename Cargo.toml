@@ -1,0 +1,15 @@
+[workspace]
+resolver = "2"
+members = [
+    "apps/web-console/src-tauri",
+    "packages/identity-core",
+    "services/identity-service",
+    "packages/crypto-core",
+    "services/document-service",
+    "packages/watermark-core",
+    "services/forensics-service",
+    "packages/ledger-core",
+    "services/ledger-service",
+    "packages/storage-sqlite",
+    "packages/system-tests"
+]

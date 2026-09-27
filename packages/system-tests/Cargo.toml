@@ -1,0 +1,32 @@
+[package]
+name = "system-tests"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+identity-core = { path = "../identity-core" }
+identity-service = { path = "../../services/identity-service" }
+crypto-core = { path = "../crypto-core" }
+document-service = { path = "../../services/document-service" }
+watermark-core = { path = "../watermark-core" }
+forensics-service = { path = "../../services/forensics-service" }
+ledger-core = { path = "../ledger-core" }
+ledger-service = { path = "../../services/ledger-service" }
+pqcrypto-traits = "0.3"
+pqcrypto-dilithium = "0.4"
+pqcrypto-kyber = "0.8"
+bincode = "1.3"
+rand = "0.8"
+hex = "0.4"
+uuid = { version = "1.8", features = ["v4"] }
+rs_merkle = "1.4"
+chrono = { version = "0.4", features = ["serde"] }
+storage-sqlite = { path = "../storage-sqlite" }
+
+[dev-dependencies]
+criterion = "0.5"
+proptest = "1.4"
+
+[[bench]]
+name = "crypto_benches"
+harness = false
